@@ -6,7 +6,17 @@ const register = async (req, res) => {
     const { fullname, username, passwordx } = req.body;
 
     try {
+        // Check if the username already exists
+        const [existingUser] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+
+        if (existingUser.length > 0) {
+            return res.status(400).json({ message: 'Existing username has been registered, try another username' });
+        }
+
+        // Hash the password
         const hashedPassword = await bcrypt.hash(passwordx, 10);
+
+        // Insert new user into the database
         const [rows] = await pool.query('INSERT INTO users (fullname, username, passwordx) VALUES (?, ?, ?)', [fullname, username, hashedPassword]);
 
         res.status(201).json({ message: 'User registered successfully!' });

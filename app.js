@@ -4,6 +4,9 @@ const bodyParser = require('body-parser');
 //Routes
 const authRoutes = require('./route/authRoutes');
 const userRoutes = require('./route/userRoutes');
+const departmentsRoutes = require('./route/departmentsRoutes');
+const courseRoutes = require('./route/courseRoutes');
+
 
 const app = express();
 
@@ -18,6 +21,8 @@ app.get ('/', function(req, res){
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/dept', departmentsRoutes);
+app.use('/api/course', courseRoutes);
 
 const PORT = 5000;
 
