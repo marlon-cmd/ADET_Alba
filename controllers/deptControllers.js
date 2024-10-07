@@ -1,56 +1,88 @@
 const pool = require('../config/database');
 
-const addDept = async (req, res) => {
-    const { dept_code, dept_name } = req.body;
+const getAllDept = async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT dept_id, dept_code, dept_name, created_at, updated_at FROM departments');
+    res.json(rows);
 
-    try {
-        // Check if the deptName already exists
-        const [existingUser] = await pool.query('SELECT dept_name, dept_code FROM departments WHERE dept_name = ? OR dept_code = ?', [dept_code, dept_code]);
-
-        if (existingUser.length > 0) {
-            return res.status(400).json({ message: 'Department Code and Name already existing, try another department code/name.' });
-        }
-
-        // Insert new user into the database
-        const [rows] = await pool.query('INSERT INTO departments (dept_code, dept_name) VALUES (?, ?)', [dept_code, dept_name,]);
-
-        res.status(201).json({ message: 'Department Code and Name successfully added!' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
-const LogInDept = async (req, res) => {
-    const { dept_code, dept_name } = req.body;
+const getDeptById = async (req, res) => {
+  const { dept_id } = req.params;
 
-    try {
-        const [deptcode] = await pool.query('SELECT * FROM departments WHERE dept_code = ?', [dept_code]);
+  try {
+    const [rows] = await pool.query('SELECT dept_id, dept_code, dept_name, created_at, updated_at FROM departments WHERE dept_id = ?', [dept_id]);
 
-        if (deptcode.length === 0) {
-            return res.status(400).json({ error: 'Invalid department code' });
-        }
-        
-        const[deptname] = await pool.query('SELECT * FROM departments WHERE dept_name = ?', [dept_name]);
-        if (deptname.length === 0){
-            return res.status(400).json({error: 'Invalid department name'});
-        }
-    
-        res.status(200).json({message: 'Log In Succesfully'});
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'The department can not be found' });
     }
-     catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
-//To show all existing Departments
-const showDept = async (req, res) => {
-    try {
-      const [dept] = await pool.query('SELECT dept_id, dept_code, dept_name, created_at, updated_at FROM departments');
-      res.json(dept);
+const createDept = async (req, res) => {
+    const { dept_code, dept_name } = req.body;
   
+    try {
+      const [result] = await pool.query('INSERT INTO departments (dept_code, dept_name) VALUES (?, ?)', [dept_code , dept_name]);
+      res.status(201).json({ course_id: result.insertId, dept_code, dept_name });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+  
+  const updateDept = async (req, res) => {
+    const { dept_id } = req.params;
+    const { dept_code, dept_name } = req.body;
+
+    if (!dept_id || isNaN(Number(dept_id))) {
+        return res.status(400).json({ error: 'Invalid or missing ID' });
+      }
+
+      if (!dept_code || !dept_name) {
+        return res.status(400).json({ error: 'department code/name are required' });
+      }
+      
+    try {
+      const [result] = await pool.query('UPDATE departments SET dept_code = ?, dept_name = ? WHERE dept_id = ?', [dept_code, dept_name, dept_id]);
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Can not update, department can not be found' });
+      }
+  
+      res.json({ message: 'department updated successfully' });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   };
 
-module.exports = { addDept, LogInDept, showDept };
+  const deleteDept = async (req, res) => {
+    const { dept_id } = req.params;
+
+    if (!dept_id || isNaN(Number(dept_id))) {
+        return res.status(400).json({ error: 'Invalid or missing ID' });
+      }
+
+  
+    try {
+      const [result] = await pool.query('DELETE FROM departments WHERE dept_id = ?', [dept_id]);
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Department can not be found' });
+      }
+  
+      res.json({ message: 'The department has been deleted successfully' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+  
+  module.exports = { getAllDept, getDeptById, createDept, updateDept, deleteDept };
+
+  

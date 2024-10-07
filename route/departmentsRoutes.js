@@ -1,10 +1,12 @@
 const express = require('express');
-const {addDept, LogInDept, showDept} = require ('../controllers/deptControllers');
+const { getAllDept, getDeptById, createDept, updateDept, deleteDept} = require('../controllers/deptControllers');
 
-const router = express.Router();
+const router =  express.Router();
 
-router.post('/addDept', addDept);
-router.post('/LogInDept', LogInDept);
-router.get('/', showDept);
+router.get('/', getAllDept);
+router.get('/:dept_id', getDeptById);
+router.post('/', createDept);
+router.put('/:dept_id', updateDept);
+router.delete('/:dept_id', deleteDept);
 
 module.exports = router;
