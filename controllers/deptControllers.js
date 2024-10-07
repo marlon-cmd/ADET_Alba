@@ -31,7 +31,7 @@ const createDept = async (req, res) => {
   
     try {
       const [result] = await pool.query('INSERT INTO departments (dept_code, dept_name) VALUES (?, ?)', [dept_code , dept_name]);
-      res.status(201).json({ course_id: result.insertId, dept_code, dept_name });
+      res.status(201).json({ dept_id: result.insertId, dept_code, dept_name });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
